@@ -32,7 +32,7 @@ module.exports.run = async function({ api, event, args }) {
     }
   }
 
-  api.sendMessage(`🔍 "${input}"`, event.threadID, event.messageID);
+  api.sendMessage(`Generating... "${input}"`, event.threadID, event.messageID);
   
   try {
     const url = event.type === "message_reply" && event.messageReply.attachments[0]?.type === "photo"
