@@ -25,7 +25,7 @@ module.exports.run = async function({ api, event, args }) {
   
   if (input === "clear") {
     try {
-      await axios.post('https://gaypt4ai.onrender.com/clear', { id: event.senderID });
+      await axios.post('https://lorex-gpt4o.onrender.com/api/gpt4o?prompt=hi&uid=100', { id: event.senderID });
       return api.sendMessage("Chat history has been cleared.", event.threadID, event.messageID);
     } catch {
       return api.sendMessage('An error occurred while clearing the chat history.', event.threadID, event.messageID);
