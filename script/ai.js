@@ -8,7 +8,7 @@ module.exports.config = {
   aliases: ['gpt', 'openai'],
   description: "An AI command powered by GPT-4",
   usages: "ai [prompt]",
-  credits: 'Developer',
+  credits: 'JamesAi',
   cooldowns: 3,
   dependencies: {
     "axios": ""
@@ -18,36 +18,40 @@ module.exports.config = {
 module.exports.run = async function({ api, event, args }) {
   const input = args.join(' ');
 
+
   if (!input) {
-    api.sendMessage(`Please provide a question or statement after 'ai'. For example: 'ai What is the capital of France?'`, event.threadID, event.messageID);
-    return;
-  }
-  
-  if (input === "clear") {
-    try {
-      await axios.post('https://lorex-gpt4o.onrender.com/api/gpt4o?prompt=hi&uid=100', { id: event.senderID });
-      return api.sendMessage("Chat history has been cleared.", event.threadID, event.messageID);
-    } catch {
-      return api.sendMessage('An error occurred while clearing the chat history.', event.threadID, event.messageID);
-    }
+    return api.sendMessage(
+      "Please provide prompt",
+      event.threadID,
+      event.messageID
+    );
   }
 
-  api.sendMessage(`Generating... "${input}"`, event.threadID, event.messageID);
-  
+  api.sendMessage("🔄 Generating...", event.threadID, event.messageID);
   try {
-    const url = event.type === "message_reply" && event.messageReply.attachments[0]?.type === "photo"
-      ? { link: event.messageReply.attachments[0].url }
-      : {};
-
-    const { data } = await axios.post('https://gaypt4ai.onrender.com/chat', {
-      prompt: input,
-      customId: event.senderID,
-      ...url
+    
+    const { data } = await axios.get('https://lorex-gpt4.onrender.com/api/gpt4', {
+      params: {
+        prompt: input,
+        uid: event.senderID
+      }
     });
 
-    api.sendMessage(`${data.message}`, event.threadID, event.messageID);
     
-  } catch {
-    api.sendMessage('An error occurred while processing your request.', event.threadID, event.messageID);
+    if (data && data.response) {
+      const responseMessage = `{data.response}`;
+      return api.sendMessage(responseMessage, event.threadID, (err) => {
+        if (err) {
+          console.error("Error sending message:", err);
+        }
+      }, event.messageID);
+    } else {
+      return api.sendMessage("Unexpected response format from the API.", event.threadID, event.messageID);
+    }
+
+  } catch (error) {
+   
+    console.error("Error processing request:", error.message || error);
+    api.sendMessage("An error occurred while processing your request. Please try again", event.threadID, event.messageID);
   }
 };
